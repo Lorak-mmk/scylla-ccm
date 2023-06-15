@@ -24,6 +24,11 @@ localhost.";
         # Make `nix run` aware that the binary is called `ccm`.
         meta.mainProgram = "ccm";
       };
+      make_wrapped = pkgs : pkgs.buildFHSUserEnv {
+        name = "scylla_ccm";
+        targetPkgs = pkgs: [(make_ccm_package pkgs) pkgs.jdk8 pkgs.jdk11];
+        runScript = "ccm";
+      };
     in
     flake-utils.lib.eachDefaultSystem (system:
       let 
@@ -31,13 +36,13 @@ localhost.";
       in
       {
         packages = rec {
-          scylla_ccm = make_ccm_package pkgs;
+          scylla_ccm = make_wrapped pkgs;
           default = scylla_ccm;
         };
       }
     ) // rec {
       overlays.default = final: prev: {
-        scylla_ccm = make_ccm_package final;
+        scylla_ccm = make_wrapped final;
       };
     };
 }
