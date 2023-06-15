@@ -9,9 +9,7 @@ localhost.";
 
   outputs = { self, nixpkgs, flake-utils }:
     let
-      make_ccm_package = doCheck: pkgs: pkgs.python3Packages.buildPythonApplication {
-        inherit doCheck;
-
+      make_ccm_package = pkgs: pkgs.python3Packages.buildPythonApplication {
         pname = "scylla_ccm";
         version = "0.1";
 
@@ -19,6 +17,7 @@ localhost.";
 
         checkInputs = with pkgs.python3Packages; [ pytestCheckHook ];
         propagatedBuildInputs =  with pkgs.python3Packages; [ pyyaml psutil six requests packaging boto3 tqdm setuptools ];
+        doCheck = false;
 
         disabledTestPaths = [ "old_tests/*.py" ];
 
@@ -32,13 +31,13 @@ localhost.";
       in
       {
         packages = rec {
-          scylla_ccm = make_ccm_package false pkgs;
+          scylla_ccm = make_ccm_package pkgs;
           default = scylla_ccm;
         };
       }
     ) // rec {
       overlays.default = final: prev: {
-        scylla_ccm = make_ccm_package false final;
+        scylla_ccm = make_ccm_package final;
       };
     };
 }
